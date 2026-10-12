@@ -75,7 +75,7 @@ export default function EmployeeCopilotPage() {
       ]}
       sampleOutput={{
         title: "Sample copilot answer",
-        tooltip: "Example grounded reply. Good answers cite Crisis Centre status and approved holding statements—flag for Comms if confidence is low.",
+        tooltip: "Example grounded reply. Good answers cite Crisis Command Centre status and approved holding statements—flag for Comms if confidence is low.",
         body: "If a customer asks about rumoured outages: thank them, confirm digital channels are operating normally, invite them to retry or use *966#, and escalate verified failures via the Contact Centre playbook. Do not repeat unverified social claims.",
         bullets: [
           "Grounded in latest Crisis Command Centre status",

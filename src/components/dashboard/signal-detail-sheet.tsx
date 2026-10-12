@@ -111,12 +111,12 @@ export function SignalDetailSheet({
           {crisisRelevant && (
             <Button
               nativeButton={false}
-              render={<Link href="/crisis" />}
+              render={<Link href="/" />}
               variant="brand"
               size="sm"
               className="w-full gap-1.5"
             >
-              Open in Crisis Centre
+              Open in Crisis Command Centre
               <ArrowRight className="size-3.5" />
             </Button>
           )}

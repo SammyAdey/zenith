@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Megaphone,
   MessageSquare,
-  Radar,
+  Scale,
   Sparkles,
   Users,
   type LucideIcon,
@@ -20,14 +20,15 @@ export type NavItem = {
 }
 
 export const allNavItems: NavItem[] = [
-  { href: "/", label: "Command Centre", icon: LayoutDashboard },
-  { href: "/reputation", label: "Reputation Intelligence", icon: Radar, deep: true },
-  { href: "/crisis", label: "Crisis Command Centre", icon: AlertTriangle, deep: true },
+  { href: "/brand-intelligence", label: "Brand Intelligence", icon: Sparkles, deep: true },
+  { href: "/", label: "Crisis Command Centre", icon: LayoutDashboard, deep: true },
+  { href: "/competitors", label: "Competitor Analysis", icon: Scale, deep: true },
+  { href: "/crisis", label: "Crisis Command Centre", icon: AlertTriangle, hidden: true },
+  { href: "/reputation", label: "Reputation Intelligence", icon: Sparkles, hidden: true },
   { href: "/stakeholders", label: "Stakeholder Mapping", icon: Users, hidden: true },
   { href: "/investor-copilot", label: "Investor Copilot", icon: Briefcase, hidden: true },
   { href: "/personalised", label: "Personalised Comms", icon: Megaphone, hidden: true },
   { href: "/employee-copilot", label: "Employee Copilot", icon: MessageSquare, hidden: true },
-  { href: "/brand-intelligence", label: "Brand Intelligence", icon: Sparkles, deep: true },
 ]
 
 export const navItems = allNavItems.filter((item) => !item.hidden)

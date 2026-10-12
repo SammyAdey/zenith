@@ -96,7 +96,12 @@ export type ForecastPoint = {
 
 export type GenAIDocument = {
   id: string
-  type: "executive_summary" | "media_brief" | "situation_report" | "recommended_actions"
+  type:
+    | "executive_summary"
+    | "media_brief"
+    | "situation_report"
+    | "recommended_actions"
+    | "competitive_brief"
   title: string
   generatedAt: string
   body: string

@@ -265,7 +265,7 @@ export function CrisisView() {
                     nativeButton={false}
                     render={
                       <Link
-                        href={`/reputation`}
+                        href="/brand-intelligence"
                         onClick={() => {
                           try {
                             sessionStorage.setItem("zenith-theme-filter", alert.theme)

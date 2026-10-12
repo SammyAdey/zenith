@@ -1,7 +1,5 @@
-import { ReputationView } from "@/components/reputation/reputation-view"
+import { redirect } from "next/navigation"
 
-export const metadata = { title: "Reputation Intelligence" }
-
-export default function ReputationPage() {
-  return <ReputationView />
+export default function ReputationRedirectPage() {
+  redirect("/brand-intelligence")
 }

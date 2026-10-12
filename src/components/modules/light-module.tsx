@@ -48,7 +48,7 @@ export function LightModule({
             size="sm"
             className="gap-1.5"
           >
-            Open Command Centre
+            Open Crisis Command Centre
             <ArrowRight className="size-3.5" />
           </Button>
         }
@@ -119,12 +119,12 @@ export function LightModule({
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               nativeButton={false}
-              render={<Link href="/reputation" />}
+              render={<Link href="/brand-intelligence" />}
               variant="outline"
               size="sm"
               className="gap-1.5"
             >
-              View Reputation Intelligence
+              View Brand Intelligence
               <ArrowRight className="size-3.5" />
             </Button>
           </div>

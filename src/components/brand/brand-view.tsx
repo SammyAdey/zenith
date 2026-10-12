@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ArrowRight } from "lucide-react"
 import {
   Bar,
@@ -17,19 +17,49 @@ import { GenAISheetButton } from "@/components/dashboard/genai-sheet"
 import { InfoTip } from "@/components/dashboard/info-tip"
 import { KpiTile } from "@/components/dashboard/kpi-tile"
 import { LivePulse } from "@/components/dashboard/live-pulse"
+import { NigeriaHeatMap } from "@/components/dashboard/nigeria-heat-map"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { ReputationChart } from "@/components/dashboard/reputation-chart"
+import { EmotionBars, SentimentPie } from "@/components/dashboard/sentiment-chart"
 import { SignalDetailSheet } from "@/components/dashboard/signal-detail-sheet"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { formatReach, formatTime, sentimentClass } from "@/lib/demo/format"
-import { peerShareOfVoice } from "@/lib/demo/insights"
+import { amplificationVelocity, peerShareOfVoice } from "@/lib/demo/insights"
 import { brandHealth, sourceMix } from "@/lib/demo/predictions"
-import { signals, themeClusters } from "@/lib/demo/signals"
-import type { Signal } from "@/lib/demo/types"
+import {
+  reputationScore,
+  signals,
+  themeClusters,
+} from "@/lib/demo/signals"
+import type { Channel, Sentiment, Signal } from "@/lib/demo/types"
 import { cn } from "@/lib/utils"
+
+const channels: { value: Channel | "all"; label: string }[] = [
+  { value: "all", label: "All channels" },
+  { value: "social", label: "Social" },
+  { value: "news", label: "News" },
+  { value: "reviews", label: "Reviews" },
+  { value: "contact_center", label: "Contact centre" },
+  { value: "survey", label: "Surveys" },
+  { value: "digital", label: "Digital" },
+]
+
+const sentiments: { value: Sentiment | "all"; label: string }[] = [
+  { value: "all", label: "All sentiment" },
+  { value: "positive", label: "Positive" },
+  { value: "neutral", label: "Neutral" },
+  { value: "negative", label: "Negative" },
+]
 
 const funnel = [
   { label: "Awareness", value: brandHealth.awareness },
@@ -38,53 +68,96 @@ const funnel = [
 ]
 
 export function BrandView() {
-  const crossSource = signals.slice(0, 8)
+  const [channel, setChannel] = useState<Channel | "all">("all")
+  const [sentiment, setSentiment] = useState<Sentiment | "all">("all")
+  const [activeTheme, setActiveTheme] = useState<string | null>(null)
   const [selected, setSelected] = useState<Signal | null>(null)
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("zenith-theme-filter")
+      if (stored) {
+        setActiveTheme(stored)
+        sessionStorage.removeItem("zenith-theme-filter")
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const filtered = useMemo(() => {
+    return signals.filter((s) => {
+      if (channel !== "all" && s.channel !== channel) return false
+      if (sentiment !== "all" && s.sentiment !== sentiment) return false
+      if (activeTheme && s.theme !== activeTheme) return false
+      return true
+    })
+  }, [channel, sentiment, activeTheme])
 
   return (
     <div className="w-full space-y-8 animate-fade-up">
       <PageHeader
-        eyebrow="Unified sensing"
-        title="Brand Intelligence Engine"
-        description="One engine aggregating news, complaints, contact-centre data, surveys and digital signals into brand health."
+        eyebrow="Brand · Reputation"
+        title="Brand Intelligence"
+        description="Unified brand health, reputation sensing, NLP themes and live signals — news, social, complaints, surveys and digital in one workspace."
         actions={
           <>
             <LivePulse className="hidden sm:inline-flex" />
+            <GenAISheetButton type="media_brief" label="Media brief" />
             <GenAISheetButton
               type="executive_summary"
-              label="Brand executive brief"
+              label="Brand brief"
               variant="brand"
             />
           </>
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-8">
         <KpiTile
           label="Brand health"
           value={String(brandHealth.score)}
-          tooltip="Overall brand vitality (0–100) blending awareness, consideration, advocacy and complaint pressure."
+          tooltip="Overall brand vitality blending awareness, consideration, advocacy and complaints."
+        />
+        <KpiTile
+          label="Reputation score"
+          value={String(reputationScore.current)}
+          tooltip="Composite 0–100 score from sentiment, volume, reach and source credibility."
+        />
+        <KpiTile
+          label="Signals (24h)"
+          value={String(signals.length * 38)}
+          hint="Simulated volume"
+          tooltip="Discrete mentions ingested in the last 24 hours across all channels."
+        />
+        <KpiTile
+          label="Amplification"
+          value={`${amplificationVelocity.currentPerHour}/h`}
+          hint={`+${amplificationVelocity.changePct}% vs baseline`}
+          alert={amplificationVelocity.changePct > 40}
+          tooltip="Mentions per hour versus the 14-day baseline."
         />
         <KpiTile
           label="Awareness"
           value={`${brandHealth.awareness}%`}
-          tooltip="Share of relevant audience that recognises Zenith."
+          tooltip="Share of audience that recognises Zenith."
         />
         <KpiTile
           label="Consideration"
           value={`${brandHealth.consideration}%`}
-          tooltip="Likelihood respondents would choose Zenith among peers."
+          tooltip="Likelihood to choose Zenith among peers."
         />
         <KpiTile
           label="Advocacy"
           value={`${brandHealth.advocacy}%`}
-          tooltip="Willingness to recommend. CSR lifts this; unresolved complaints suppress it."
+          tooltip="Willingness to recommend."
         />
         <KpiTile
-          label="Complaint index"
-          value={String(brandHealth.complaintIndex)}
-          alert={brandHealth.complaintIndex > 20}
-          tooltip="Normalised complaint intensity (lower is better). Above ~20 is elevated."
+          label="Negative share"
+          value="23%"
+          hint="Above baseline"
+          alert
+          tooltip="Share of signals classified as negative versus the 14-day baseline."
         />
       </div>
 
@@ -93,7 +166,7 @@ export function BrandView() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
               Brand funnel
-              <InfoTip content="Awareness → Consideration → Advocacy. A wide top with a narrow middle usually means perception or service friction, not invisibility." />
+              <InfoTip content="Awareness → Consideration → Advocacy. A wide top with a narrow middle usually means perception or service friction." />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
@@ -115,7 +188,7 @@ export function BrandView() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
               Share of voice vs peers
-              <InfoTip content="Relative mention share among Nigerian tier-1 banks (simulated). Pair with sentiment: high SOV with negative tilt is riskier than quiet positive share." />
+              <InfoTip content="Relative mention share across banks, top fintechs and MTN. For deeper peer analysis open Competitor Analysis." />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -141,16 +214,16 @@ export function BrandView() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <ul className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
-              {peerShareOfVoice
-                .filter((p) => p.name !== "Others")
-                .map((p) => (
-                  <li key={p.name}>
-                    {p.name}: sentiment {p.sentiment > 0 ? "+" : ""}
-                    {(p.sentiment * 100).toFixed(0)}
-                  </li>
-                ))}
-            </ul>
+            <Button
+              nativeButton={false}
+              render={<Link href="/competitors" />}
+              variant="link"
+              size="sm"
+              className="mt-1 gap-1 px-0"
+            >
+              Open Competitor Analysis
+              <ArrowRight className="size-3.5" />
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -160,7 +233,7 @@ export function BrandView() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
               Source mix
-              <InfoTip content="Share of brand signals by channel. Contact-centre tilt usually means service issues." />
+              <InfoTip content="Share of brand signals by channel." />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -203,107 +276,187 @@ export function BrandView() {
         </Card>
       </div>
 
-      <section>
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-sm font-semibold tracking-tight">Cross-source theme map</h2>
-            <InfoTip content="Click a theme to open Reputation Intelligence filtered to that narrative." />
-          </div>
-          <Button
-            nativeButton={false}
-            render={<Link href="/reputation" />}
-            variant="link"
-            size="sm"
-            className="gap-1"
-          >
-            Open Reputation
-            <ArrowRight className="size-3.5" />
+      <NigeriaHeatMap />
+
+      <div className="flex flex-wrap gap-2">
+        <Select
+          value={channel}
+          onValueChange={(v) => setChannel((v ?? "all") as Channel | "all")}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {channels.map((c) => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={sentiment}
+          onValueChange={(v) => setSentiment((v ?? "all") as Sentiment | "all")}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {sentiments.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {activeTheme && (
+          <Button size="sm" variant="outline" onClick={() => setActiveTheme(null)}>
+            Clear theme: {activeTheme}
           </Button>
+        )}
+      </div>
+
+      <section>
+        <div className="mb-3 flex items-center gap-1.5">
+          <h2 className="text-sm font-semibold tracking-tight">
+            Trending topics and themes clustering
+          </h2>
+          <InfoTip content="Click a theme to filter the live feed below. Volume is signal count; velocity/h shows amplification vs baseline." />
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {themeClusters.map((theme) => (
-            <Link
-              key={theme.id}
-              href="/reputation"
-              onClick={() => {
-                try {
-                  sessionStorage.setItem("zenith-theme-filter", theme.name)
-                } catch {
-                  /* ignore */
-                }
-              }}
-              className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-brand/40 hover:bg-surface-field/50"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium tracking-tight">{theme.name}</p>
-                <Badge className={cn("font-normal capitalize", sentimentClass(theme.sentiment))}>
-                  {theme.sentiment}
-                </Badge>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">{theme.description}</p>
-              <p className="mt-3 text-[11px] tracking-wide text-muted-foreground uppercase">
-                {theme.volume} signals · {theme.changePct > 0 ? "+" : ""}
-                {theme.changePct}% · {theme.velocityPerHour}/h
-              </p>
-            </Link>
-          ))}
+          {themeClusters.map((theme) => {
+            const selectedTheme = activeTheme === theme.name
+            const velocityUp = theme.velocityPerHour > theme.velocityBaseline
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => setActiveTheme(selectedTheme ? null : theme.name)}
+                className={cn(
+                  "rounded-xl border bg-card p-4 text-left transition-colors hover:bg-surface-field/60",
+                  selectedTheme
+                    ? "border-brand ring-1 ring-brand/30"
+                    : "border-border",
+                )}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-medium tracking-tight">{theme.name}</p>
+                  <Badge className={cn("font-normal capitalize", sentimentClass(theme.sentiment))}>
+                    {theme.sentiment}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-2xl font-semibold tracking-tight">{theme.volume}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Volume · {theme.changePct > 0 ? "+" : ""}
+                  {theme.changePct}% WoW ·{" "}
+                  <span className={velocityUp ? "text-status-warning" : undefined}>
+                    {theme.velocityPerHour}/h
+                  </span>
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">{theme.description}</p>
+              </button>
+            )
+          })}
         </div>
       </section>
 
-      <AgentStatusRow
-        title="Listening & monitoring agents"
-        titleTooltip="Social Listening and Media Monitoring feed this engine; Crisis Detection highlights themes that may escalate."
-        showTitle
-      />
-
-      <Card className="shadow-none">
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-            Unified signal stream
-            <InfoTip content="Click a signal for NLP detail. Use Related crises when negative high-reach items appear." />
-          </CardTitle>
-          <Button
-            nativeButton={false}
-            render={<Link href="/crisis" />}
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-          >
-            Related crises
-            <ArrowRight className="size-3.5" />
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {crossSource.map((signal) => (
-            <button
-              key={signal.id}
-              type="button"
-              onClick={() => setSelected(signal)}
-              className="flex w-full flex-col gap-2 rounded-xl border border-border p-3 text-left transition-colors hover:bg-surface-field/50 sm:flex-row sm:items-start sm:justify-between"
+      <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+        <Card className="shadow-none">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+              Live signal feed
+              <InfoTip content="Click any signal for NLP detail. Badges show sentiment, emotion and topic." />
+            </CardTitle>
+            <Button
+              nativeButton={false}
+              render={<Link href="/" />}
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
             >
-              <div className="min-w-0">
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="font-normal capitalize">
-                    {signal.channel.replace("_", " ")}
-                  </Badge>
+              Related crises
+              <ArrowRight className="size-3.5" />
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {filtered.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border bg-surface-field/60 px-6 py-12 text-center">
+                <p className="text-sm font-medium">No signals match</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Adjust channel, sentiment or theme filters.
+                </p>
+              </div>
+            )}
+            {filtered.map((signal) => (
+              <button
+                key={signal.id}
+                type="button"
+                onClick={() => setSelected(signal)}
+                className="w-full rounded-xl border border-border p-4 text-left transition-colors hover:bg-surface-field/50"
+              >
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge className={cn("font-normal capitalize", sentimentClass(signal.sentiment))}>
                     {signal.sentiment}
                   </Badge>
+                  <Badge variant="outline" className="font-normal capitalize">
+                    {signal.emotion}
+                  </Badge>
+                  <Badge variant="secondary" className="font-normal">
+                    {signal.topic}
+                  </Badge>
                 </div>
-                <p className="mt-1.5 text-sm font-medium tracking-tight">{signal.title}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                <h3 className="mt-2 text-sm font-medium tracking-tight">{signal.title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {signal.excerpt}
                 </p>
+                <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span>{signal.source}</span>
+                  <span>{formatTime(signal.timestamp)}</span>
+                  <span>Reach {formatReach(signal.reach)}</span>
+                  <span className="text-brand">{signal.theme}</span>
+                </div>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="shadow-none">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+                Sentiment mix
+                <InfoTip content="Distribution by polarity for the current filters." />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SentimentPie />
+              <div className="mt-2 flex flex-wrap justify-center gap-3 text-[11px] text-muted-foreground">
+                {["Positive", "Neutral", "Negative"].map((n) => (
+                  <span key={n}>{n}</span>
+                ))}
               </div>
-              <div className="shrink-0 text-[11px] text-muted-foreground sm:text-right">
-                <p>{signal.source}</p>
-                <p>{formatTime(signal.timestamp)}</p>
-                <p>Reach {formatReach(signal.reach)}</p>
-              </div>
-            </button>
-          ))}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-none">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+                Emotion detection
+                <InfoTip content="Finer-grained NLP beyond polarity. Tall anger/fear bars often warrant Crisis Command Centre attention." />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EmotionBars />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <AgentStatusRow
+        title="Listening & monitoring agents"
+        titleTooltip="Social Listening and Media Monitoring feed this workspace; Crisis Detection flags escalating themes."
+        showTitle
+      />
 
       <SignalDetailSheet
         signal={selected}

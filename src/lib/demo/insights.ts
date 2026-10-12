@@ -16,11 +16,14 @@ export const geoVolumes: GeoVolume[] = [
 ]
 
 export const peerShareOfVoice: PeerShareOfVoice[] = [
-  { name: "Zenith", share: 28, sentiment: 0.12 },
-  { name: "GTCO", share: 24, sentiment: 0.08 },
-  { name: "Access", share: 22, sentiment: -0.04 },
-  { name: "FirstBank", share: 18, sentiment: 0.02 },
-  { name: "Others", share: 8, sentiment: 0 },
+  { name: "Zenith", share: 18, sentiment: 0.12 },
+  { name: "GTCO", share: 14, sentiment: 0.08 },
+  { name: "OPay", share: 13, sentiment: 0.06 },
+  { name: "Access", share: 12, sentiment: -0.04 },
+  { name: "Moniepoint", share: 12, sentiment: 0.09 },
+  { name: "MTN", share: 12, sentiment: -0.02 },
+  { name: "FirstBank", share: 10, sentiment: 0.02 },
+  { name: "PalmPay", share: 9, sentiment: 0.01 },
 ]
 
 export const narrativeState: {

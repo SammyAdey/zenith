@@ -51,6 +51,19 @@ export const genaiDocuments: Record<string, GenAIDocument> = {
       "Schedule 16:00 WAT re-forecast after mitigation signals land",
     ],
   },
+  competitive_brief: {
+    id: "gen-comp",
+    type: "competitive_brief",
+    title: "Competitive perception brief — 12 Oct 2026",
+    generatedAt: "2026-10-12T09:20:00+01:00",
+    body: "Zenith leads deposit-bank share of voice (18%) in a set that includes OPay, Moniepoint, PalmPay and MTN, but trails GTCO on reputation score and loses payments/agent narratives to fintechs. Public conversation frames Zenith as strong on community investment and earnings resilience, while POS friction and wallet convenience gaps are the clearest vulnerabilities this week.",
+    bullets: [
+      "Defend: payments clarity before Moniepoint/OPay reliability praise widens the merchant gap",
+      "Amplify: SME academy / women-in-banking — Zenith’s clearest owned narrative",
+      "Watch: MTN USSD/fraud chatter can migrate onto bank brands sharing the same rails",
+      "Opportunity: contrast Zenith deposit trust against PalmPay/OPay innovation buzz",
+    ],
+  },
 }
 
 export function getGenAIDocument(type: GenAIDocument["type"]) {

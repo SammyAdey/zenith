@@ -1,7 +1,5 @@
-import { CrisisView } from "@/components/crisis/crisis-view"
+import { redirect } from "next/navigation"
 
-export const metadata = { title: "Crisis Command Centre" }
-
-export default function CrisisPage() {
-  return <CrisisView />
+export default function CrisisRedirectPage() {
+  redirect("/")
 }
