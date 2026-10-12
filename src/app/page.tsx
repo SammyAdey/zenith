@@ -1,69 +1,165 @@
-import Image from "next/image";
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 
-export default function Home() {
+import { AgentStatusRow } from "@/components/dashboard/agent-status"
+import { GenAISheetButton } from "@/components/dashboard/genai-sheet"
+import { InfoTip } from "@/components/dashboard/info-tip"
+import { KpiTile } from "@/components/dashboard/kpi-tile"
+import { PageHeader } from "@/components/dashboard/page-header"
+import { ReputationChart } from "@/components/dashboard/reputation-chart"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { severityClass } from "@/lib/demo/format"
+import { crisisAlerts, riskPrediction } from "@/lib/demo/predictions"
+import { reputationScore } from "@/lib/demo/signals"
+import { cn } from "@/lib/utils"
+
+export default function CommandCentrePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <div className="w-full space-y-8 animate-fade-up">
+      <PageHeader
+        eyebrow="Overview"
+        title="Command Centre"
+        description="A connected intelligence layer turns dispersed signals into timely insight, tailored engagement and coordinated action."
+        actions={
+          <>
+            <GenAISheetButton type="situation_report" label="Situation report" />
+            <GenAISheetButton
+              type="executive_summary"
+              label="Executive summary"
+              variant="brand"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <KpiTile
+          label="Reputation score"
+          value={String(reputationScore.current)}
+          hint={`${reputationScore.current - reputationScore.previous} vs last week · ${reputationScore.label}`}
+          tooltip="Composite 0–100 health score from sentiment, volume, reach and source weight. Compare to last week: sustained drops of 3+ points usually mean a narrative is taking hold."
+        />
+        <KpiTile
+          label="Escalation likelihood"
+          value={`${riskPrediction.escalationLikelihood}%`}
+          hint="Payments friction cluster"
+          alert={riskPrediction.escalationLikelihood >= 50}
+          tooltip="Modelled probability the top risk cluster spills into wider media or regulatory attention within ~48 hours. Above 50% typically triggers Crisis Centre playbooks."
+        />
+        <KpiTile
+          label="Active alerts"
+          value={String(crisisAlerts.filter((a) => a.status !== "contained").length)}
+          hint="Across media, social & contact centre"
+          tooltip="Count of open early-warning items that are watching or escalating—not yet contained. Each alert has its own severity and escalation score in Crisis Command Centre."
+        />
+        <KpiTile
+          label="Overall risk index"
+          value={String(riskPrediction.overallRisk)}
+          hint={riskPrediction.trendProjection.slice(0, 48) + "…"}
+          tooltip="Blended operational and reputational risk (0–100) across drivers like payments friction, rumours and branch complaints. Higher means more downside pressure on the reputation score."
+        />
+      </div>
+
+      <section className="rounded-2xl border border-status-failed/30 bg-status-failed/5 p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-sm font-semibold text-status-failed">Active alerts</h2>
+            <InfoTip content="Priority incidents needing attention now. Severity (high/medium/low) is impact if ignored; % escalate is the chance it widens in ~48h. Open Crisis Centre for playbooks." />
+          </div>
+          <Button
+            nativeButton={false}
+            render={<Link href="/crisis" />}
+            variant="outline"
+            size="sm"
+            className="gap-1.5 bg-card"
           >
-            Documentation
-          </a>
+            Open Crisis Centre
+            <ArrowRight className="size-3.5" />
+          </Button>
         </div>
-      </main>
+        <ul className="mt-4 space-y-3">
+          {crisisAlerts.slice(0, 2).map((alert) => (
+            <li
+              key={alert.id}
+              className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className={cn("font-normal capitalize", severityClass(alert.severity))}>
+                    {alert.severity}
+                  </Badge>
+                  <p className="text-sm font-medium text-foreground">{alert.title}</p>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{alert.summary}</p>
+              </div>
+              <p className="shrink-0 text-xs font-medium text-brand">
+                {alert.escalationLikelihood}% escalate
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <AgentStatusRow />
+
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <Card className="shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+              Reputation forecast
+              <InfoTip content="Solid line = observed daily score. Dashed line = predictive path if current risk drivers continue unmitigated. A widening gap below the solid line is your early warning window." />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ReputationChart />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Solid = observed · Dashed = predictive projection
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+              Deep modules
+              <InfoTip content="Shortcuts into the three fully interactive workspaces. Use Reputation for NLP detail, Crisis for response coordination, and Brand for cross-source health." />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {[
+              {
+                href: "/reputation",
+                title: "Reputation Intelligence",
+                desc: "NLP sentiment, emotion, topics & themes",
+              },
+              {
+                href: "/crisis",
+                title: "Crisis Command Centre",
+                desc: "Early warning, scenarios & message coordination",
+              },
+              {
+                href: "/brand-intelligence",
+                title: "Brand Intelligence Engine",
+                desc: "Unified news, complaints, surveys & digital",
+              },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-3 transition-colors hover:bg-surface-field"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium tracking-tight">{item.title}</p>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </div>
+                <ArrowRight className="size-4 shrink-0 text-brand" />
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }

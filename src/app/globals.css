@@ -1,26 +1,204 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-cream: var(--cream);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-mid: var(--brand-mid);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-line: var(--brand-line);
+  --color-ink: var(--ink);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-field: var(--surface-field);
+  --color-status-success: var(--status-success);
+  --color-status-failed: var(--status-failed);
+  --color-status-running: var(--status-running);
+  --color-status-queued: var(--status-queued);
+  --color-status-warning: var(--status-warning);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Zenith Bank palette — Khizana token roles, white canvas */
+  --cream: #ffffff;
+  --ink: #0b1f3a;
+  --brand: #ed1c24;
+  --brand-soft: #fef2f2;
+  --brand-mid: #f87171;
+  --brand-deep: #c41218;
+  --brand-line: #fecaca;
+  --surface: #ffffff;
+  --surface-muted: #fafafa;
+  --surface-field: #f5f5f5;
+  --status-success: #16a34a;
+  --status-failed: #dc2626;
+  --status-running: #2563eb;
+  --status-queued: #737373;
+  --status-warning: #d97706;
+
+  --background: #ffffff;
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-field);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-field);
+  --muted-foreground: #737373;
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--brand-deep);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: var(--brand);
+  --chart-1: var(--brand);
+  --chart-2: var(--brand-mid);
+  --chart-3: var(--brand-deep);
+  --chart-4: #737373;
+  --chart-5: var(--ink);
+  --radius: 0.5rem;
+  --sidebar: var(--surface-muted);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--surface-field);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--brand);
+}
+
+.dark {
+  --cream: #000000;
+  --background: #000000;
+  --foreground: #f5f5f5;
+  --card: #141414;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
+  --primary: #f5f5f5;
+  --primary-foreground: #000000;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #f5f5f5;
+  --muted: #1f1f1f;
+  --muted-foreground: #a3a3a3;
+  --accent: #3b1a1c;
+  --accent-foreground: var(--brand-mid);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--brand);
+  --chart-1: var(--brand);
+  --chart-2: var(--brand-mid);
+  --chart-3: var(--brand-deep);
+  --chart-4: #a3a3a3;
+  --chart-5: #f5f5f5;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1f1f1f;
+  --sidebar-accent-foreground: #f5f5f5;
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: var(--brand);
+  --surface: #141414;
+  --surface-muted: #0a0a0a;
+  --surface-field: #1f1f1f;
+  --brand-soft: #3b1a1c;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .section-eyebrow {
+    @apply text-xs font-normal tracking-widest text-brand uppercase;
+  }
+
+  .section-heading {
+    @apply mt-1 text-2xl tracking-tighter text-foreground sm:text-3xl;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fade-up 0.5s ease-out 0.08s both;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fade-up 0.5s ease-out 0.16s both;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fade-up 0.5s ease-out 0.24s both;
 }
